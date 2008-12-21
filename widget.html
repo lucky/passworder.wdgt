@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Password Generator</title>
+    <style type="text/css" media="screen">
+        body {font-size: 11px; font-family: "Helvetica Neue", sans-serif; color: #333; margin:0;padding:0; background: url('back.png'); height: 206px; width: 255px; display:block;}
+        input {font-size: 11px;}
+        input.text {width: 110px;}
+        p {margin: 8px 0;}
+        #front {background: url('Default.png') no-repeat;display:block;padding: 40px 10px 30px 20px;}
+        #back {display:block; padding: 30px; color: #FFF;}
+        #info_button {position:absolute; bottom:35px; right:30px;}
+        #done_button {position:absolute; bottom:20px; right: 20px;}
+        #message {font-style:italic;}
+    </style>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js' charset='utf-8'></script>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'></script>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'></script>
+    <script type="text/javascript" charset="utf-8" src="sha1.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    
+    var gDoneButton;
+    var gInfoButton;
+    var prefs_visible = false;
+    
+    $ = function (id) {
+        return document.getElementById(id);
+    };
+    generate = function () {
+        var hash_end = Number($('passlen').value) + 3;
+        $('np').value = hex_sha1($('site').value + $('username').value + $('mp').value).substring(3, hash_end);
+        $('np').focus();
+        $('np').select();
+    };
+    
+    toggle_prefs = function () {
+        if(window.widget){
+            var trans = prefs_visible ? 'ToFront' : 'ToBack';        
+            widget.prepareForTransition(trans);
+        }
+        if(prefs_visible) $('message').innerHTML = '';
+        
+        $('back').style.display = prefs_visible ? 'none' : 'block';
+        $('front').style.display = prefs_visible ? 'block' : 'none';
+        
+        if(window.widget){
+            setTimeout('widget.performTransition();', 0);
+        }
+        prefs_visible = !prefs_visible;
+    };
+    
+    init = function () {
+        gDoneButton = new AppleGlassButton($("done_button"), "Done", toggle_prefs);
+        gInfoButton = new AppleInfoButton($("info_button"), $("front"), "white", "white", toggle_prefs);
+        if(window.widget){
+            widget.onhide = function () {
+                $('np').value = '';
+                $('mp').value = '';
+            };
+            $('passlen').value = widget.preferenceForKey("passlen") || 7;
+            $('back').style.display = 'none';
+        }
+    };
+    
+    set_passlen_preference = function () {
+        if(window.widget){
+            widget.setPreferenceForKey($('passlen').value,"passlen");
+        }
+        $('message').innerHTML = 'Preferences updated!';
+    };
+    </script>
+</head>
+<body onload="init();">
+<div id="front">
+    <form action="." onsubmit="generate(); return false;" accept-charset="utf-8">
+        <input class="text" type="text" id="site" /> Site Name<br />
+        <input class="text" type="text" id="username" /> Username<br />
+        <input class="text" type="password" id="mp" /> Master Password<br />
+        <p><input type="submit" value="Generate" /> <input type="reset" value="Clear" /></p>
+        <p>New Password:<br /> <input type="text" id="np" /></p>
+    </form>
+    <div id="info_button"></div>
+</div>
+<div id="back">
+    <p>Password length:
+    <select onchange="set_passlen_preference()" id="passlen">
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option>10</option>
+        <option>11</option>
+        <option>12</option>
+        <option>13</option>
+        <option>14</option>
+        <option>15</option>
+    </select></p>
+    <div id="message"></div>
+    <div id="done_button"></div>
+</div>
+</body>
+</html>
